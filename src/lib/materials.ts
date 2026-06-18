@@ -1,6 +1,12 @@
 import fs from "fs";
 import path from "path";
-import { findExternalVideo, EXTERNAL_VIDEOS, driveEmbedUrl } from "@/lib/materials-external";
+import {
+  findExternalVideo,
+  EXTERNAL_VIDEOS,
+  EXTERNAL_BOOKS,
+  driveEmbedUrl,
+  driveDownloadUrl,
+} from "@/lib/materials-external";
 
 const ASSETS_ROOT = path.join(process.cwd(), "assets");
 const ALLOWED_EXTENSIONS = new Set([
@@ -32,6 +38,8 @@ export type MaterialFile = {
   tooLarge: boolean;
   externalUrl?: string;
   embedUrl?: string;
+  externalDownloadUrl?: string;
+  isVideo?: boolean;
 };
 
 export type MaterialCategory = {
@@ -103,19 +111,13 @@ function collectFiles(dir: string, categoryFolder: string): MaterialFile[] {
   return files.sort((a, b) => a.name.localeCompare(b.name, "pt-BR"));
 }
 
-export function getMaterialsCatalog(): MaterialCategory[] {
-  const categories = MATERIAL_CATEGORIES.map(({ id, folder, label }) => ({
-    id,
-    label,
-    files: collectFiles(path.join(ASSETS_ROOT, folder), folder),
-  })).filter((cat) => cat.files.length > 0);
-
-  const gravacoes = categories.find((cat) => cat.id === "gravacoes");
-  const externalOnly = EXTERNAL_VIDEOS.filter(
-    (video) =>
-      !gravacoes?.files.some((file) => video.match.test(file.name)),
+function externalVideoEntries(
+  gravacoes: MaterialCategory | undefined,
+): MaterialFile[] {
+  return EXTERNAL_VIDEOS.filter(
+    (video) => !gravacoes?.files.some((file) => video.match.test(file.name)),
   ).map((video) => ({
-    id: Buffer.from(`external/${video.fileId}`).toString("base64url"),
+    id: Buffer.from(`external-video/${video.fileId}`).toString("base64url"),
     name: `${video.title}.mp4`,
     relativePath: `${video.title}.mp4`,
     sizeBytes: 0,
@@ -124,20 +126,58 @@ export function getMaterialsCatalog(): MaterialCategory[] {
     tooLarge: true,
     externalUrl: video.driveUrl,
     embedUrl: driveEmbedUrl(video.fileId),
+    isVideo: true,
   }));
+}
 
-  if (externalOnly.length === 0) return categories;
+function externalBookEntries(livros: MaterialCategory | undefined): MaterialFile[] {
+  return EXTERNAL_BOOKS.filter(
+    (book) => !livros?.files.some((file) => book.match.test(file.name)),
+  ).map((book) => ({
+    id: Buffer.from(`external-book/${book.fileId}`).toString("base64url"),
+    name: `${book.title}.pdf`,
+    relativePath: `${book.title}.pdf`,
+    sizeBytes: 0,
+    sizeLabel: "Google Drive",
+    downloadable: false,
+    tooLarge: true,
+    externalUrl: book.driveUrl,
+    embedUrl: driveEmbedUrl(book.fileId),
+    externalDownloadUrl: driveDownloadUrl(book.fileId),
+    isVideo: false,
+  }));
+}
 
-  if (gravacoes) {
-    gravacoes.files.push(...externalOnly);
-    gravacoes.files.sort((a, b) => a.name.localeCompare(b.name, "pt-BR"));
-    return categories;
+export function getMaterialsCatalog(): MaterialCategory[] {
+  const categories = MATERIAL_CATEGORIES.map(({ id, folder, label }) => ({
+    id,
+    label,
+    files: collectFiles(path.join(ASSETS_ROOT, folder), folder),
+  })).filter((cat) => cat.files.length > 0);
+
+  const gravacoes = categories.find((cat) => cat.id === "gravacoes");
+  const externalVideos = externalVideoEntries(gravacoes);
+  if (externalVideos.length > 0) {
+    if (gravacoes) {
+      gravacoes.files.push(...externalVideos);
+      gravacoes.files.sort((a, b) => a.name.localeCompare(b.name, "pt-BR"));
+    } else {
+      categories.push({ id: "gravacoes", label: "Gravações", files: externalVideos });
+    }
   }
 
-  return [
-    ...categories,
-    { id: "gravacoes", label: "Gravações", files: externalOnly },
-  ];
+  const livros = categories.find((cat) => cat.id === "livros");
+  const externalBooks = externalBookEntries(livros);
+  if (externalBooks.length > 0) {
+    if (livros) {
+      livros.files.push(...externalBooks);
+      livros.files.sort((a, b) => a.name.localeCompare(b.name, "pt-BR"));
+    } else {
+      categories.push({ id: "livros", label: "Livros", files: externalBooks });
+    }
+  }
+
+  return categories;
 }
 
 export function resolveMaterialFile(

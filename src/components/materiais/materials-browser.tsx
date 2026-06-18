@@ -70,15 +70,20 @@ export function MaterialsBrowser({ catalog }: MaterialsBrowserProps) {
                 <div className="min-w-0 space-y-1">
                   <p className="truncate text-sm font-medium">{file.name}</p>
                   <p className="text-xs text-muted-foreground">{file.sizeLabel}</p>
-                  {file.embedUrl && (
+                  {file.embedUrl && file.isVideo !== false && (
                     <p className="text-xs text-muted-foreground">
                       Disponível para assistir online
+                    </p>
+                  )}
+                  {file.embedUrl && file.isVideo === false && (
+                    <p className="text-xs text-muted-foreground">
+                      Disponível para ler ou baixar via Google Drive
                     </p>
                   )}
                 </div>
 
                 <div className="flex shrink-0 flex-wrap gap-2">
-                  {file.embedUrl && file.externalUrl ? (
+                  {file.embedUrl && file.externalUrl && file.isVideo !== false ? (
                     <button
                       type="button"
                       onClick={() => openVideo(file)}
@@ -90,6 +95,29 @@ export function MaterialsBrowser({ catalog }: MaterialsBrowserProps) {
                       <Play className="mr-2 size-4" />
                       Assistir
                     </button>
+                  ) : null}
+                  {file.embedUrl && file.externalUrl && file.isVideo === false ? (
+                    <button
+                      type="button"
+                      onClick={() => openVideo(file)}
+                      className={cn(
+                        buttonVariants({ variant: "default", size: "sm" }),
+                        "bg-brand hover:bg-brand/90",
+                      )}
+                    >
+                      Ler
+                    </button>
+                  ) : null}
+                  {file.externalDownloadUrl ? (
+                    <a
+                      href={file.externalDownloadUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
+                    >
+                      <Download className="mr-2 size-4" />
+                      Baixar
+                    </a>
                   ) : null}
                   {file.downloadable ? (
                     <a
