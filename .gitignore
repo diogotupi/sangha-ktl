@@ -39,3 +39,17 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# vídeos locais (hospedados no Google Drive)
+assets/**/*.mp4
+
+# duplicados / não usados no site
+assets/BG Hero/
+assets/Logo*
+**/*.pages/
+**/*.epub
+**/*.mobi
+
+/src/generated/prisma
+
+.vercel

@@ -1,0 +1,12 @@
+# Vercel upload limit — vídeos ficam no Google Drive
+assets/**/*.mp4
+
+# Duplicados / não usados em produção
+assets/BG Hero/
+assets/Logo*
+**/*.pages/
+**/*.epub
+**/*.mobi
+
+.env
+.env.*
