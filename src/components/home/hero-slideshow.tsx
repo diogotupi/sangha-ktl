@@ -1,44 +1,76 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
+import { cn } from "@/lib/utils";
 
+/** Ordem: 5 → 4 → 2 */
 const HERO_IMAGES = [
-  "/hero/19413584-5CFA-4049-A517-17B58AB4BD07.jpg",
-  "/hero/20230416_115444_exported_2952_1681682293052_Original.JPG",
-  "/hero/ee97b497-34e7-4268-8815-c6bdfc0e70e8.jpg",
-  "/hero/IMG_2321.jpg",
-  "/hero/IMG_4904.JPG",
+  {
+    src: "/hero/IMG_4904.JPG",
+    desktopClass: "md:[object-position:center_30%]",
+  },
+  {
+    src: "/hero/IMG_2321.jpg",
+    desktopClass: "md:[object-position:center_30%]",
+  },
+  {
+    src: "/hero/20230416_115444_exported_2952_1681682293052_Original.JPG",
+    desktopClass: "md:object-center",
+  },
 ] as const;
 
 const INTERVAL_MS = 6000;
 
 export function HeroSlideshow() {
+  const [slides, setSlides] = useState([...HERO_IMAGES]);
   const [activeIndex, setActiveIndex] = useState(0);
 
+  const handleImageError = useCallback((src: string) => {
+    setSlides((current) => {
+      const next = current.filter((slide) => slide.src !== src);
+      return next.length > 0 ? next : current;
+    });
+    setActiveIndex((current) => Math.max(0, current - 1));
+  }, []);
+
   useEffect(() => {
+    if (slides.length === 0) return;
+
     const timer = setInterval(() => {
-      setActiveIndex((current) => (current + 1) % HERO_IMAGES.length);
+      setActiveIndex((current) => (current + 1) % slides.length);
     }, INTERVAL_MS);
 
     return () => clearInterval(timer);
-  }, []);
+  }, [slides.length]);
+
+  useEffect(() => {
+    if (activeIndex >= slides.length) {
+      setActiveIndex(0);
+    }
+  }, [activeIndex, slides.length]);
+
+  if (slides.length === 0) {
+    return <div className="absolute inset-0 bg-brand" aria-hidden />;
+  }
+
+  const activeSlide = slides[activeIndex] ?? slides[0];
 
   return (
-    <div className="absolute inset-0" aria-hidden>
-      {HERO_IMAGES.map((src, index) => (
-        <Image
-          key={src}
-          src={src}
-          alt=""
-          fill
-          priority={index === 0}
-          sizes="100vw"
-          className={`object-cover transition-opacity duration-1000 ease-in-out ${
-            index === activeIndex ? "opacity-100" : "opacity-0"
-          }`}
-        />
-      ))}
+    <div className="absolute inset-0 bg-brand" aria-hidden>
+      <Image
+        key={activeSlide.src}
+        src={activeSlide.src}
+        alt=""
+        fill
+        priority
+        sizes="100vw"
+        onError={() => handleImageError(activeSlide.src)}
+        className={cn(
+          "object-cover object-center animate-in fade-in duration-1000",
+          activeSlide.desktopClass,
+        )}
+      />
       <div className="absolute inset-0 bg-brand/55" />
     </div>
   );
