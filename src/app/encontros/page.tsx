@@ -6,6 +6,7 @@ import { ptBR } from "date-fns/locale";
 import { ArrowRight, Clock } from "lucide-react";
 import { SiteShell } from "@/components/layout/site-shell";
 import { PageHeader } from "@/components/layout/page-header";
+import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import { upcomingEvents } from "@/lib/constants";
 
 export const metadata: Metadata = {
@@ -32,7 +33,8 @@ export default function EventsPage() {
       />
 
       <div className="mx-auto max-w-3xl px-6 pb-24">
-        <Link
+        <ScrollReveal variant="fade-up" delay={120}>
+          <Link
           href="/ingresso"
           className="group block rounded-2xl border border-border/60 bg-card/50 p-6 transition-colors hover:border-brand/30 hover:bg-card md:p-8"
         >
@@ -77,6 +79,7 @@ export default function EventsPage() {
             </div>
           </div>
         </Link>
+        </ScrollReveal>
       </div>
     </SiteShell>
   );

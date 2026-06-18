@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { SiteShell } from "@/components/layout/site-shell";
 import { PageHeader } from "@/components/layout/page-header";
 import { AboutPhotoGallery } from "@/components/about/about-photo-gallery";
+import { ScrollReveal } from "@/components/ui/scroll-reveal";
 
 export const metadata: Metadata = {
   title: "Sobre a Sangha",
@@ -15,7 +16,8 @@ export default function AboutPage() {
       <PageHeader eyebrow="Nossa comunidade" title="Sobre a Sangha" centered />
 
       <article className="mx-auto max-w-5xl space-y-12 px-6 pb-24">
-        <p className="mx-auto max-w-3xl text-justify leading-relaxed text-muted-foreground">
+        <ScrollReveal variant="fade-up" delay={100}>
+          <p className="mx-auto max-w-3xl text-justify leading-relaxed text-muted-foreground">
           Somos uma comunidade de amigos e pesquisadores localizados principalmente
           no Rio de Janeiro. Temos como interesse e objetivos participar do melhor da
           condição humana com recursos e riquezas das tradições contemplativas, bem
@@ -25,7 +27,8 @@ export default function AboutPage() {
           Shangpa Kagyu. Bokar Rinpoche redigiu o nome para nosso centro e nos foi
           encaminhado pelo Lama Trinle, que nos ajuda e aconselha em nossas
           atividades.
-        </p>
+          </p>
+        </ScrollReveal>
 
         <AboutPhotoGallery />
       </article>

@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { ScrollReveal } from "@/components/ui/scroll-reveal";
 
 type PageHeaderProps = {
   eyebrow?: string;
@@ -16,26 +17,33 @@ export function PageHeader({
   centered = false,
 }: PageHeaderProps) {
   return (
-    <div
-      className={cn(
-        "mx-auto max-w-3xl space-y-4 px-6 pb-12 pt-16 md:pt-24",
-        centered && "text-center",
-        className,
-      )}
-    >
-      {eyebrow && (
-        <p className="font-accent text-sm tracking-[0.15em] text-brand uppercase">
-          {eyebrow}
-        </p>
-      )}
-      <h1 className="font-heading text-4xl leading-tight text-foreground md:text-5xl">
-        {title}
-      </h1>
-      {description && (
-        <p className="max-w-2xl text-lg leading-relaxed text-muted-foreground md:text-xl">
-          {description}
-        </p>
-      )}
-    </div>
+    <ScrollReveal variant="fade-up" threshold={0.2}>
+      <div
+        className={cn(
+          "mx-auto max-w-3xl space-y-4 px-6 pb-12 pt-16 md:pt-24",
+          centered && "text-center",
+          className,
+        )}
+      >
+        {eyebrow && (
+          <p className="font-accent text-sm tracking-[0.15em] text-brand uppercase">
+            {eyebrow}
+          </p>
+        )}
+        <h1 className="font-heading text-4xl leading-tight text-foreground md:text-5xl">
+          {title}
+        </h1>
+        {description && (
+          <p
+            className={cn(
+              "max-w-2xl text-lg leading-relaxed text-muted-foreground md:text-xl",
+              centered && "mx-auto",
+            )}
+          >
+            {description}
+          </p>
+        )}
+      </div>
+    </ScrollReveal>
   );
 }
