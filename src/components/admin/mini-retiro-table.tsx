@@ -6,6 +6,7 @@ import { useCallback, useTransition } from "react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Eye, Download } from "lucide-react";
+import { DeleteMiniRetiroButton } from "@/components/admin/delete-mini-retiro-button";
 import { interestLabels } from "@/lib/validations/mini-retiro";
 import type { MiniRetiroInterest } from "@/generated/prisma/client";
 import { Badge } from "@/components/ui/badge";
@@ -167,13 +168,20 @@ export function MiniRetiroTable({ submissions }: MiniRetiroTableProps) {
                     {format(new Date(sub.createdAt), "d MMM yyyy", { locale: ptBR })}
                   </TableCell>
                   <TableCell>
-                    <Link
-                      href={`/admin/retiros/${sub.id}`}
-                      aria-label={`Ver ${sub.fullName}`}
-                      className={cn(buttonVariants({ variant: "ghost", size: "icon-sm" }))}
-                    >
-                      <Eye className="size-4" />
-                    </Link>
+                    <div className="flex items-center gap-1">
+                      <Link
+                        href={`/admin/retiros/${sub.id}`}
+                        aria-label={`Ver ${sub.fullName}`}
+                        className={cn(buttonVariants({ variant: "ghost", size: "icon-sm" }))}
+                      >
+                        <Eye className="size-4" />
+                      </Link>
+                      <DeleteMiniRetiroButton
+                        id={sub.id}
+                        fullName={sub.fullName}
+                        variant="icon"
+                      />
+                    </div>
                   </TableCell>
                 </TableRow>
               ))

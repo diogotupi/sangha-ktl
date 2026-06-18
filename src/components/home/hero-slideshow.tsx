@@ -5,8 +5,9 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { heroSlides } from "@/lib/community-photos";
 
-const HERO_IMAGES = heroSlides.map((photo) => ({
+const HERO_IMAGES = heroSlides.map((photo, index) => ({
   src: photo.src,
+  mobileClass: index === 0 ? "object-right" : "object-center",
   desktopClass:
     photo.objectClass === "object-center"
       ? "md:object-center"
@@ -60,7 +61,8 @@ export function HeroSlideshow() {
         sizes="100vw"
         onError={() => handleImageError(activeSlide.src)}
         className={cn(
-          "object-cover object-center animate-in fade-in duration-1000",
+          "object-cover animate-in fade-in duration-1000",
+          activeSlide.mobileClass,
           activeSlide.desktopClass,
         )}
       />

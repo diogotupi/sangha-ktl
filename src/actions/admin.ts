@@ -22,6 +22,7 @@ import type {
   SubmissionStatus,
 } from "@/generated/prisma/client";
 import { AuthError } from "next-auth";
+import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 export type LoginState = {
@@ -299,6 +300,32 @@ export async function getMiniRetiroById(id: string) {
   return prisma.miniRetiroSubmission.findUnique({
     where: { id },
   });
+}
+
+export type DeleteMiniRetiroResult =
+  | { success: true }
+  | { success: false; error: string };
+
+export async function deleteMiniRetiroSubmission(
+  id: string,
+): Promise<DeleteMiniRetiroResult> {
+  await requireAdmin();
+
+  try {
+    await prisma.miniRetiroSubmission.delete({
+      where: { id },
+    });
+
+    revalidatePath("/admin");
+    revalidatePath("/admin/retiros");
+
+    return { success: true };
+  } catch {
+    return {
+      success: false,
+      error: "Não foi possível apagar esta resposta.",
+    };
+  }
 }
 
 export async function exportMiniRetiroCsv(
