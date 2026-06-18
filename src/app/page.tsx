@@ -8,10 +8,10 @@ import { cn } from "@/lib/utils";
 export default function HomePage() {
   return (
     <SiteShell>
-      <section className="relative flex min-h-[min(85vh,720px)] items-center justify-center overflow-hidden">
+      <section className="relative flex min-h-[min(85vh,720px)] items-end justify-center overflow-hidden">
         <HeroSlideshow />
 
-        <div className="relative z-10 flex flex-col items-center gap-4 px-6 py-24">
+        <div className="relative z-10 flex w-full flex-col items-center gap-4 px-6 pb-14 md:pb-20">
           <Link
             href="/ingresso"
             className={cn(
@@ -40,17 +40,17 @@ export default function HomePage() {
             {
               icon: Heart,
               title: "Encontros quinzenais",
-              text: "Meditação e estudo online, com encontros presenciais no Rio.",
+              text: "Meditação e estudo online, com encontros online e híbridos no Rio.",
             },
             {
               icon: BookOpen,
-              title: "Estudo do Dhamma",
-              text: "Leituras e diálogos sobre os ensinamentos da tradição Kagyu.",
+              title: "Estudo e prática do Dharma",
+              text: "Leituras, estudo e prática sobre os ensinamentos da tradição Kagyu.",
             },
             {
               icon: Calendar,
               title: "Retiros e práticas",
-              text: "Momentos de aprofundamento ao longo do ano.",
+              text: "Fique por dentro de quando teremos retiros e ensinamentos com os mestres.",
             },
           ].map(({ icon: Icon, title, text }) => (
             <div key={title} className="space-y-4">
@@ -62,13 +62,6 @@ export default function HomePage() {
             </div>
           ))}
         </div>
-      </section>
-
-      <section className="mx-auto max-w-5xl px-6 py-20 text-center">
-        <blockquote className="font-heading text-2xl leading-relaxed text-foreground md:text-3xl">
-          &ldquo;Caminhamos juntos, passo a passo, com paciência e compaixão.&rdquo;
-        </blockquote>
-        <p className="mt-6 text-sm text-muted-foreground">— Tradição Kagyu</p>
       </section>
     </SiteShell>
   );

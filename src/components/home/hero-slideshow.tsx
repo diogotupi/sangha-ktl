@@ -3,22 +3,15 @@
 import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
+import { heroSlides } from "@/lib/community-photos";
 
-/** Ordem: 5 → 4 → 2 */
-const HERO_IMAGES = [
-  {
-    src: "/hero/IMG_4904.JPG",
-    desktopClass: "md:[object-position:center_30%]",
-  },
-  {
-    src: "/hero/IMG_2321.jpg",
-    desktopClass: "md:[object-position:center_30%]",
-  },
-  {
-    src: "/hero/20230416_115444_exported_2952_1681682293052_Original.JPG",
-    desktopClass: "md:object-center",
-  },
-] as const;
+const HERO_IMAGES = heroSlides.map((photo) => ({
+  src: photo.src,
+  desktopClass:
+    photo.objectClass === "object-center"
+      ? "md:object-center"
+      : `md:[object-position:${photo.objectClass.slice(7, -1)}]`,
+}));
 
 const INTERVAL_MS = 6000;
 

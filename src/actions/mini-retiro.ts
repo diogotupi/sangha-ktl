@@ -5,6 +5,7 @@ import {
   miniRetiroSchema,
   type MiniRetiroInput,
 } from "@/lib/validations/mini-retiro";
+import { serializeUnavailableWeekends } from "@/lib/mini-retiro-weekends";
 import { revalidatePath } from "next/cache";
 
 export type MiniRetiroActionResult =
@@ -36,7 +37,7 @@ export async function createMiniRetiroSubmission(
         email: input.email,
         interest: input.interest,
         interestOther: input.interestOther || null,
-        dateRestrictions: input.dateRestrictions,
+        dateRestrictions: serializeUnavailableWeekends(input.unavailableWeekends),
         carAvailability: input.carAvailability,
         dietaryRestrictions: input.dietaryRestrictions,
         roomSharing: input.roomSharing,

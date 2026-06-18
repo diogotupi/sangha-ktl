@@ -1,18 +1,14 @@
 import { z } from "zod";
 
-export const meditationLevelSchema = z.enum([
-  "NONE",
-  "BEGINNER",
-  "INTERMEDIATE",
-  "ADVANCED",
-]);
+export const meditationLevelSchema = z.enum(
+  ["NONE", "BEGINNER", "INTERMEDIATE", "ADVANCED"],
+  { error: "Selecione sua experiência com meditação" },
+);
 
-export const buddhismLevelSchema = z.enum([
-  "NEW",
-  "SOME_KNOWLEDGE",
-  "PRACTITIONER",
-  "LONG_TERM",
-]);
+export const buddhismLevelSchema = z.enum(
+  ["NEW", "SOME_KNOWLEDGE", "PRACTITIONER", "LONG_TERM"],
+  { error: "Selecione sua experiência com budismo" },
+);
 
 export const personalStepSchema = z.object({
   fullName: z
@@ -61,6 +57,6 @@ export type SubmissionInput = z.infer<typeof submissionSchema>;
 export const WIZARD_STEPS = [
   { id: 1, title: "Quem é você", key: "personal" },
   { id: 2, title: "Seu e-mail", key: "contact" },
-  { id: 3, title: "Sua jornada", key: "experience" },
+  { id: 3, title: "Só pra gente te conhecer", key: "experience" },
   { id: 4, title: "Mais alguma coisa", key: "final" },
 ] as const;

@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft, ArrowRight, Check, Leaf } from "lucide-react";
 import { createSubmission } from "@/actions/submission";
 import { Button } from "@/components/ui/button";
@@ -33,7 +32,7 @@ const stepSchemas = [
   contactStepSchema,
   experienceStepSchema,
   finalStepSchema,
-];
+] as const;
 
 export function IntakeWizard() {
   const [step, setStep] = useState(0);
@@ -43,13 +42,13 @@ export function IntakeWizard() {
 
   const {
     register,
-    handleSubmit,
-    trigger,
     setValue,
     watch,
+    getValues,
+    setError,
+    clearErrors,
     formState: { errors },
   } = useForm<SubmissionInput>({
-    resolver: zodResolver(submissionSchema),
     defaultValues: {
       fullName: "",
       birthDate: "",
@@ -64,7 +63,6 @@ export function IntakeWizard() {
       observations: "",
       howDidYouHear: "",
     },
-    mode: "onTouched",
   });
 
   const meditation = watch("meditationExperience");
@@ -72,26 +70,55 @@ export function IntakeWizard() {
   const progress = ((step + 1) / WIZARD_STEPS.length) * 100;
   const currentStep = WIZARD_STEPS[step];
 
+  function applyZodErrors(error: { issues: { path: PropertyKey[]; message: string }[] }) {
+    for (const issue of error.issues) {
+      const field = issue.path[0];
+      if (typeof field === "string") {
+        setError(field as keyof SubmissionInput, { message: issue.message });
+      }
+    }
+  }
+
   async function goNext() {
-    const fields = Object.keys(stepSchemas[step].shape) as (keyof SubmissionInput)[];
-    const valid = await trigger(fields);
-    if (valid) setStep((s) => Math.min(s + 1, WIZARD_STEPS.length - 1));
+    clearErrors();
+    const result = stepSchemas[step].safeParse(getValues());
+    if (!result.success) {
+      applyZodErrors(result.error);
+      return;
+    }
+    setStep((s) => s + 1);
+  }
+
+  async function handleFinalSubmit() {
+    clearErrors();
+    setSubmitError(null);
+
+    const stepResult = finalStepSchema.safeParse(getValues());
+    if (!stepResult.success) {
+      applyZodErrors(stepResult.error);
+      return;
+    }
+
+    const result = submissionSchema.safeParse(getValues());
+    if (!result.success) {
+      applyZodErrors(result.error);
+      return;
+    }
+
+    setIsSubmitting(true);
+    const response = await createSubmission(result.data);
+    setIsSubmitting(false);
+
+    if (response.success) {
+      setSubmitted(true);
+    } else {
+      setSubmitError(response.error);
+    }
   }
 
   function goBack() {
+    clearErrors();
     setStep((s) => Math.max(s - 1, 0));
-  }
-
-  async function onSubmit(data: SubmissionInput) {
-    setIsSubmitting(true);
-    setSubmitError(null);
-    const result = await createSubmission(data);
-    setIsSubmitting(false);
-    if (result.success) {
-      setSubmitted(true);
-    } else {
-      setSubmitError(result.error);
-    }
   }
 
   if (submitted) {
@@ -104,10 +131,10 @@ export function IntakeWizard() {
         <p className="mt-4 text-lg leading-relaxed text-muted-foreground">
           Seu e-mail foi cadastrado em nossa lista. Nos próximos encontros
           quinzenais, você receberá por e-mail o link do Zoom e todas as
-          informações necessárias — geralmente alguns dias antes de cada sessão.
+          informações necessárias, geralmente alguns dias antes de cada sessão.
         </p>
         <p className="mt-6 text-sm text-muted-foreground">
-          Encontros aos sábados, online ou híbridos, a partir do Rio de Janeiro.
+          Encontros quinzenais, online ou híbridos, no Rio de Janeiro.
         </p>
       </div>
     );
@@ -115,7 +142,7 @@ export function IntakeWizard() {
 
   return (
     <form
-      onSubmit={handleSubmit(onSubmit)}
+      onSubmit={(event) => event.preventDefault()}
       className="mx-auto max-w-2xl px-6 pb-24"
       noValidate
     >
@@ -212,30 +239,30 @@ export function IntakeWizard() {
                 Sua jornada até aqui
               </h2>
               <p className="text-muted-foreground">
-                Não há resposta certa — queremos apenas te conhecer melhor.
+                Só pra gente te conhecer um pouco melhor.
               </p>
             </div>
             <div className="space-y-5">
               <div className="space-y-2">
                 <Label>Experiência com meditação</Label>
                 <Select
-                  value={meditation ?? ""}
-                  onValueChange={(v) =>
+                  value={meditation}
+                  onValueChange={(v) => {
                     setValue(
                       "meditationExperience",
                       v as SubmissionInput["meditationExperience"],
-                      { shouldValidate: true },
-                    )
-                  }
+                    );
+                    clearErrors("meditationExperience");
+                  }}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="w-full">
                     <span className={cn(!meditation && "text-muted-foreground")}>
                       {meditation
                         ? meditationLabels[meditation]
                         : "Selecione..."}
                     </span>
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent alignItemWithTrigger={false}>
                     {(
                       Object.entries(meditationLabels) as [
                         SubmissionInput["meditationExperience"],
@@ -258,21 +285,21 @@ export function IntakeWizard() {
               <div className="space-y-2">
                 <Label>Experiência com budismo</Label>
                 <Select
-                  value={buddhism ?? ""}
-                  onValueChange={(v) =>
+                  value={buddhism}
+                  onValueChange={(v) => {
                     setValue(
                       "buddhismExperience",
                       v as SubmissionInput["buddhismExperience"],
-                      { shouldValidate: true },
-                    )
-                  }
+                    );
+                    clearErrors("buddhismExperience");
+                  }}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="w-full">
                     <span className={cn(!buddhism && "text-muted-foreground")}>
                       {buddhism ? buddhismLabels[buddhism] : "Selecione..."}
                     </span>
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent alignItemWithTrigger={false}>
                     {(
                       Object.entries(buddhismLabels) as [
                         SubmissionInput["buddhismExperience"],
@@ -322,7 +349,7 @@ export function IntakeWizard() {
                 Há mais alguma coisa?
               </h2>
               <p className="text-muted-foreground">
-                Este espaço é seu — use como quiser, ou deixe em branco.
+                Este espaço é seu, use como quiser, ou deixe em branco.
               </p>
             </div>
             <div className="space-y-5">
@@ -358,12 +385,21 @@ export function IntakeWizard() {
         </Button>
 
         {step < WIZARD_STEPS.length - 1 ? (
-          <Button type="button" onClick={goNext} className="bg-brand hover:bg-brand/90">
+          <Button
+            type="button"
+            onClick={() => void goNext()}
+            className="bg-brand hover:bg-brand/90"
+          >
             Continuar
             <ArrowRight className="ml-2 size-4" />
           </Button>
         ) : (
-          <Button type="submit" disabled={isSubmitting} className="bg-brand hover:bg-brand/90">
+          <Button
+            type="button"
+            disabled={isSubmitting}
+            onClick={() => void handleFinalSubmit()}
+            className="bg-brand hover:bg-brand/90"
+          >
             {isSubmitting ? "Enviando..." : "Cadastrar"}
             <Check className="ml-2 size-4" />
           </Button>

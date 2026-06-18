@@ -77,7 +77,7 @@ export function MaterialsBrowser({ catalog }: MaterialsBrowserProps) {
                   )}
                   {file.embedUrl && file.isVideo === false && (
                     <p className="text-xs text-muted-foreground">
-                      Disponível para ler ou baixar via Google Drive
+                      Disponível para baixar via Google Drive
                     </p>
                   )}
                 </div>
@@ -94,18 +94,6 @@ export function MaterialsBrowser({ catalog }: MaterialsBrowserProps) {
                     >
                       <Play className="mr-2 size-4" />
                       Assistir
-                    </button>
-                  ) : null}
-                  {file.embedUrl && file.externalUrl && file.isVideo === false ? (
-                    <button
-                      type="button"
-                      onClick={() => openVideo(file)}
-                      className={cn(
-                        buttonVariants({ variant: "default", size: "sm" }),
-                        "bg-brand hover:bg-brand/90",
-                      )}
-                    >
-                      Ler
                     </button>
                   ) : null}
                   {file.externalDownloadUrl ? (

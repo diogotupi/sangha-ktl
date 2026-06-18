@@ -5,9 +5,7 @@ export const miniRetiroSchema = z.object({
   email: z.string().email("Informe um e-mail válido"),
   interest: z.enum(["YES", "NO", "OTHER"]),
   interestOther: z.string().max(500).optional(),
-  dateRestrictions: z
-    .string()
-    .min(1, "Informe se há restrições de data ou escreva \"nenhuma\""),
+  unavailableWeekends: z.array(z.string()),
   carAvailability: z.enum(["HAS_CAR", "NEEDS_RIDE"]),
   dietaryRestrictions: z
     .string()

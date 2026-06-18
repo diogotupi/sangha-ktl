@@ -7,16 +7,13 @@ import { updateSubmissionStatus } from "@/actions/admin";
 import {
   buddhismLabels,
   meditationLabels,
-  preferredContactLabels,
   statusLabels,
 } from "@/lib/constants";
 import type {
   BuddhismLevel,
   MeditationLevel,
-  PreferredContact,
   SubmissionStatus,
 } from "@/generated/prisma/client";
-import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -29,14 +26,12 @@ import { Separator } from "@/components/ui/separator";
 type SubmissionDetailProps = {
   submission: {
     id: string;
-    protocol: string;
     fullName: string;
     birthDate: Date | null;
     city: string;
     occupation: string | null;
     email: string;
     phone: string | null;
-    preferredContact: PreferredContact;
     meditationExperience: MeditationLevel;
     buddhismExperience: BuddhismLevel;
     tradition: string | null;
@@ -45,7 +40,6 @@ type SubmissionDetailProps = {
     howDidYouHear: string | null;
     status: SubmissionStatus;
     createdAt: Date;
-    availabilityDates: { date: Date }[];
   };
 };
 
@@ -72,10 +66,9 @@ export function SubmissionDetail({ submission }: SubmissionDetailProps) {
     <div className="space-y-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="font-mono text-sm text-muted-foreground">{submission.protocol}</p>
-          <h1 className="font-heading text-2xl text-foreground">{submission.fullName}</h1>
+          <h1 className="text-2xl font-semibold text-foreground">{submission.fullName}</h1>
           <p className="text-sm text-muted-foreground">
-            Inscrito em{" "}
+            Cadastrado em{" "}
             {format(new Date(submission.createdAt), "d 'de' MMMM 'de' yyyy", {
               locale: ptBR,
             })}
@@ -105,7 +98,7 @@ export function SubmissionDetail({ submission }: SubmissionDetailProps) {
       <Separator />
 
       <section className="space-y-4">
-        <h2 className="font-heading text-lg">Dados pessoais</h2>
+        <h2 className="text-base font-semibold">Dados pessoais</h2>
         <dl className="grid gap-4 sm:grid-cols-2">
           <Field label="Nome" value={submission.fullName} />
           <Field
@@ -122,19 +115,15 @@ export function SubmissionDetail({ submission }: SubmissionDetailProps) {
       </section>
 
       <section className="space-y-4">
-        <h2 className="font-heading text-lg">Contato</h2>
+        <h2 className="text-base font-semibold">Contato</h2>
         <dl className="grid gap-4 sm:grid-cols-2">
           <Field label="E-mail" value={submission.email} />
           <Field label="Telefone" value={submission.phone ?? undefined} />
-          <Field
-            label="Preferência"
-            value={preferredContactLabels[submission.preferredContact]}
-          />
         </dl>
       </section>
 
       <section className="space-y-4">
-        <h2 className="font-heading text-lg">Experiência</h2>
+        <h2 className="text-base font-semibold">Experiência</h2>
         <dl className="grid gap-4 sm:grid-cols-2">
           <Field
             label="Meditação"
@@ -149,20 +138,9 @@ export function SubmissionDetail({ submission }: SubmissionDetailProps) {
         <Field label="Motivação" value={submission.motivation} />
       </section>
 
-      <section className="space-y-4">
-        <h2 className="font-heading text-lg">Disponibilidade</h2>
-        <div className="flex flex-wrap gap-2">
-          {submission.availabilityDates.map(({ date }) => (
-            <Badge key={date.toISOString()} variant="outline">
-              {format(new Date(date), "d MMM yyyy", { locale: ptBR })}
-            </Badge>
-          ))}
-        </div>
-      </section>
-
       {(submission.howDidYouHear || submission.observations) && (
         <section className="space-y-4">
-          <h2 className="font-heading text-lg">Observações</h2>
+          <h2 className="text-base font-semibold">Observações</h2>
           <Field label="Como conheceu" value={submission.howDidYouHear} />
           <Field label="Observações" value={submission.observations} />
         </section>

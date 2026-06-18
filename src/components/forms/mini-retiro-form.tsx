@@ -18,6 +18,7 @@ import {
   roomLabels,
   type MiniRetiroInput,
 } from "@/lib/validations/mini-retiro";
+import { MiniRetiroWeekendPicker } from "@/components/forms/mini-retiro-weekend-picker";
 import { cn } from "@/lib/utils";
 
 export function MiniRetiroForm() {
@@ -38,7 +39,7 @@ export function MiniRetiroForm() {
       email: "",
       interest: undefined,
       interestOther: "",
-      dateRestrictions: "",
+      unavailableWeekends: [],
       carAvailability: undefined,
       dietaryRestrictions: "",
       roomSharing: undefined,
@@ -77,7 +78,7 @@ export function MiniRetiroForm() {
     <form onSubmit={handleSubmit(onSubmit)} className="mx-auto max-w-2xl space-y-8">
       <div className="space-y-2 rounded-xl border border-border/60 bg-card/50 p-6">
         <p className="text-sm leading-relaxed text-muted-foreground">
-          Estamos organizando um mini-retiro no Rio de Janeiro — sexta à noite
+          Estamos organizando um mini-retiro no Rio de Janeiro, sexta à noite
           até domingo antes do almoço. A proposta é práticas de meditação mais
           longas e conversas sobre os ensinamentos. Responda abaixo para
           planejarmos e estimarmos os custos.
@@ -140,19 +141,23 @@ export function MiniRetiroForm() {
         )}
       </fieldset>
 
-      <div className="space-y-2">
-        <Label htmlFor="dateRestrictions">
+      <fieldset className="space-y-3">
+        <legend className="text-sm font-medium">
           Restrição de datas nos próximos meses? *
-        </Label>
+        </legend>
         <p className="text-sm text-muted-foreground">
-          Se sim, indique os fins de semana impossíveis para você. Caso contrário,
-          escreva &quot;nenhuma&quot;.
+          Marque os fins de semana (sexta a domingo) em que você{" "}
+          <strong>não</strong> pode participar. Se puder em todos, deixe em
+          branco.
         </p>
-        <Textarea id="dateRestrictions" rows={3} {...register("dateRestrictions")} />
-        {errors.dateRestrictions && (
-          <p className="text-sm text-destructive">{errors.dateRestrictions.message}</p>
-        )}
-      </div>
+        <MiniRetiroWeekendPicker
+          value={watch("unavailableWeekends") ?? []}
+          onChange={(weekends) =>
+            setValue("unavailableWeekends", weekends, { shouldValidate: true })
+          }
+          error={errors.unavailableWeekends?.message}
+        />
+      </fieldset>
 
       <fieldset className="space-y-3">
         <legend className="text-sm font-medium">

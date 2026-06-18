@@ -6,8 +6,8 @@ import { useCallback, useTransition } from "react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Eye, Download } from "lucide-react";
-import { meditationLabels, statusLabels } from "@/lib/constants";
-import type { SubmissionStatus, MeditationLevel } from "@/generated/prisma/client";
+import { interestLabels } from "@/lib/validations/mini-retiro";
+import type { MiniRetiroInterest } from "@/generated/prisma/client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { buttonVariants } from "@/components/ui/button";
@@ -29,28 +29,32 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-type SubmissionRow = {
+type MiniRetiroRow = {
   id: string;
   fullName: string;
   email: string;
-  city: string;
-  meditationExperience: MeditationLevel;
-  status: SubmissionStatus;
+  interest: MiniRetiroInterest;
+  dateRestrictions: string;
   createdAt: Date;
 };
 
-type SubmissionFiltersProps = {
-  submissions: SubmissionRow[];
+type MiniRetiroTableProps = {
+  submissions: MiniRetiroRow[];
 };
 
-export function SubmissionsTable({ submissions }: SubmissionFiltersProps) {
+const interestBadgeVariant = {
+  YES: "default",
+  NO: "secondary",
+  OTHER: "outline",
+} as const;
+
+export function MiniRetiroTable({ submissions }: MiniRetiroTableProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
 
   const search = searchParams.get("search") ?? "";
-  const status = searchParams.get("status") ?? "ALL";
-  const meditation = searchParams.get("meditation") ?? "ALL";
+  const interest = searchParams.get("interest") ?? "ALL";
   const from = searchParams.get("from") ?? "";
   const to = searchParams.get("to") ?? "";
 
@@ -62,7 +66,7 @@ export function SubmissionsTable({ submissions }: SubmissionFiltersProps) {
         else params.delete(key);
       });
       startTransition(() => {
-        router.push(`/admin/cadastros?${params.toString()}`);
+        router.push(`/admin/retiros?${params.toString()}`);
       });
     },
     [router, searchParams],
@@ -70,50 +74,31 @@ export function SubmissionsTable({ submissions }: SubmissionFiltersProps) {
 
   function handleExport() {
     const params = new URLSearchParams(searchParams.toString());
-    window.location.href = `/admin/cadastros/export?${params.toString()}`;
+    window.location.href = `/admin/retiros/export?${params.toString()}`;
   }
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <div className="grid flex-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid flex-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
           <Input
-            placeholder="Buscar nome, e-mail ou cidade..."
+            placeholder="Buscar nome ou e-mail..."
             defaultValue={search}
             onChange={(e) => updateParams({ search: e.target.value })}
-            aria-label="Buscar cadastros"
+            aria-label="Buscar respostas do retiro"
           />
 
           <Select
-            value={status}
-            onValueChange={(v) => updateParams({ status: v === "ALL" ? "" : v })}
+            value={interest}
+            onValueChange={(v) => updateParams({ interest: v === "ALL" ? "" : v })}
           >
             <SelectTrigger>
-              <SelectValue placeholder="Status" />
+              <SelectValue placeholder="Interesse" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="ALL">Todos os status</SelectItem>
+              <SelectItem value="ALL">Todo interesse</SelectItem>
               {(
-                Object.entries(statusLabels) as [SubmissionStatus, string][]
-              ).map(([value, label]) => (
-                <SelectItem key={value} value={value}>
-                  {label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          <Select
-            value={meditation}
-            onValueChange={(v) => updateParams({ meditation: v === "ALL" ? "" : v })}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Meditação" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="ALL">Toda experiência</SelectItem>
-              {(
-                Object.entries(meditationLabels) as [MeditationLevel, string][]
+                Object.entries(interestLabels) as [MiniRetiroInterest, string][]
               ).map(([value, label]) => (
                 <SelectItem key={value} value={value}>
                   {label}
@@ -150,18 +135,17 @@ export function SubmissionsTable({ submissions }: SubmissionFiltersProps) {
             <TableRow>
               <TableHead>Nome</TableHead>
               <TableHead className="hidden md:table-cell">E-mail</TableHead>
-              <TableHead className="hidden md:table-cell">Cidade</TableHead>
-              <TableHead className="hidden lg:table-cell">Meditação</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="hidden sm:table-cell">Data</TableHead>
+              <TableHead>Interesse</TableHead>
+              <TableHead className="hidden lg:table-cell">Datas</TableHead>
+              <TableHead className="hidden sm:table-cell">Enviado em</TableHead>
               <TableHead className="w-12" />
             </TableRow>
           </TableHeader>
           <TableBody>
             {submissions.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="py-12 text-center text-muted-foreground">
-                  {isPending ? "Carregando..." : "Nenhum cadastro encontrado."}
+                <TableCell colSpan={6} className="py-12 text-center text-muted-foreground">
+                  {isPending ? "Carregando..." : "Nenhuma resposta encontrada."}
                 </TableCell>
               </TableRow>
             ) : (
@@ -171,19 +155,20 @@ export function SubmissionsTable({ submissions }: SubmissionFiltersProps) {
                   <TableCell className="hidden md:table-cell text-sm text-muted-foreground">
                     {sub.email}
                   </TableCell>
-                  <TableCell className="hidden md:table-cell">{sub.city}</TableCell>
-                  <TableCell className="hidden lg:table-cell text-sm text-muted-foreground">
-                    {meditationLabels[sub.meditationExperience]}
-                  </TableCell>
                   <TableCell>
-                    <Badge variant="secondary">{statusLabels[sub.status]}</Badge>
+                    <Badge variant={interestBadgeVariant[sub.interest]}>
+                      {interestLabels[sub.interest]}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="hidden lg:table-cell max-w-xs truncate text-sm text-muted-foreground">
+                    {sub.dateRestrictions}
                   </TableCell>
                   <TableCell className="hidden sm:table-cell text-sm text-muted-foreground">
                     {format(new Date(sub.createdAt), "d MMM yyyy", { locale: ptBR })}
                   </TableCell>
                   <TableCell>
                     <Link
-                      href={`/admin/cadastros/${sub.id}`}
+                      href={`/admin/retiros/${sub.id}`}
                       aria-label={`Ver ${sub.fullName}`}
                       className={cn(buttonVariants({ variant: "ghost", size: "icon-sm" }))}
                     >

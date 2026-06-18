@@ -12,10 +12,6 @@ export function Footer() {
             <p className="font-accent text-xs tracking-wide uppercase opacity-90">
               {siteConfig.tagline}
             </p>
-            <p className="text-sm leading-relaxed opacity-80">
-              Um refúgio para cultivar presença, sabedoria e compaixão — juntos,
-              passo a passo.
-            </p>
           </div>
 
           <div className="space-y-3 text-sm opacity-80">
@@ -41,8 +37,7 @@ export function Footer() {
         </div>
 
         <div className="mt-12 border-t border-white/20 pt-8 text-center text-xs opacity-70">
-          © {new Date().getFullYear()} {siteConfig.name}. Com gratidão a todos os
-          que caminham conosco.
+          © {new Date().getFullYear()} {siteConfig.name}
         </div>
       </div>
     </footer>

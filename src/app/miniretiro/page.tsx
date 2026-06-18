@@ -18,7 +18,7 @@ export default function MiniRetiroPage() {
             Rio de Janeiro
           </h1>
           <p className="text-muted-foreground">
-            Formulário exclusivo para membros da sangha — link enviado diretamente.
+            Formulário exclusivo para membros da sangha, link enviado diretamente.
           </p>
         </div>
         <MiniRetiroForm />

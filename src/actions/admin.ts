@@ -5,13 +5,19 @@ import { prisma } from "@/lib/prisma";
 import {
   buddhismLabels,
   meditationLabels,
-  preferredContactLabels,
   statusLabels,
 } from "@/lib/constants";
+import {
+  carLabels,
+  financialLabels,
+  interestLabels,
+  roomLabels,
+} from "@/lib/validations/mini-retiro";
+import { analyzeMiniRetiroWeekends } from "@/lib/mini-retiro-weekends";
 import type {
   BuddhismLevel,
   MeditationLevel,
-  PreferredContact,
+  MiniRetiroInterest,
   Prisma,
   SubmissionStatus,
 } from "@/generated/prisma/client";
@@ -78,7 +84,6 @@ export async function getSubmissions(filters: SubmissionFilters = {}) {
     where.OR = [
       { fullName: { contains: filters.search, mode: "insensitive" } },
       { email: { contains: filters.search, mode: "insensitive" } },
-      { protocol: { contains: filters.search, mode: "insensitive" } },
       { city: { contains: filters.search, mode: "insensitive" } },
     ];
   }
@@ -103,11 +108,6 @@ export async function getSubmissions(filters: SubmissionFilters = {}) {
 
   return prisma.submission.findMany({
     where,
-    include: {
-      availabilityDates: {
-        orderBy: { date: "asc" },
-      },
-    },
     orderBy: { createdAt: "desc" },
   });
 }
@@ -117,11 +117,6 @@ export async function getSubmissionById(id: string) {
 
   return prisma.submission.findUnique({
     where: { id },
-    include: {
-      availabilityDates: {
-        orderBy: { date: "asc" },
-      },
-    },
   });
 }
 
@@ -144,7 +139,7 @@ export async function getDashboardMetrics(periodDays = 30) {
   const periodStart = new Date(now);
   periodStart.setDate(periodStart.getDate() - periodDays);
 
-  const [total, periodCount, submissions, availabilityDates] =
+  const [total, periodCount, submissions, miniRetiroTotal, miniRetiroInterested] =
     await Promise.all([
       prisma.submission.count(),
       prisma.submission.count({
@@ -154,11 +149,9 @@ export async function getDashboardMetrics(periodDays = 30) {
         select: { createdAt: true },
         orderBy: { createdAt: "asc" },
       }),
-      prisma.availabilityDate.groupBy({
-        by: ["date"],
-        _count: { date: true },
-        orderBy: { _count: { date: "desc" } },
-        take: 10,
+      prisma.miniRetiroSubmission.count(),
+      prisma.miniRetiroSubmission.count({
+        where: { interest: "YES" },
       }),
     ]);
 
@@ -172,16 +165,12 @@ export async function getDashboardMetrics(periodDays = 30) {
     .map(([month, count]) => ({ month, count }))
     .slice(-12);
 
-  const topAvailability = availabilityDates.map((item) => ({
-    date: item.date,
-    count: item._count.date,
-  }));
-
   return {
     total,
     periodCount,
     submissionsByMonth,
-    topAvailability,
+    miniRetiroTotal,
+    miniRetiroInterested,
   };
 }
 
@@ -200,7 +189,6 @@ export async function exportSubmissionsCsv(
   const submissions = await getSubmissions(filters);
 
   const headers = [
-    "Protocolo",
     "Nome",
     "E-mail",
     "Telefone",
@@ -208,13 +196,13 @@ export async function exportSubmissionsCsv(
     "Meditação",
     "Budismo",
     "Status",
-    "Contato preferido",
-    "Datas disponíveis",
+    "Motivação",
+    "Como conheceu",
+    "Observações",
     "Criado em",
   ];
 
   const rows = submissions.map((sub) => [
-    sub.protocol,
     sub.fullName,
     sub.email,
     sub.phone,
@@ -222,10 +210,9 @@ export async function exportSubmissionsCsv(
     meditationLabels[sub.meditationExperience],
     buddhismLabels[sub.buddhismExperience],
     statusLabels[sub.status],
-    preferredContactLabels[sub.preferredContact as PreferredContact],
-    sub.availabilityDates
-      .map((d) => d.date.toISOString().split("T")[0])
-      .join("; "),
+    sub.motivation,
+    sub.howDidYouHear,
+    sub.observations,
     sub.createdAt.toISOString(),
   ]);
 
@@ -249,4 +236,106 @@ export async function getSubmissionStats() {
   });
 
   return { byStatus, byMeditation };
+}
+
+export async function getMiniRetiroWeekendAnalysis() {
+  await requireAdmin();
+
+  const submissions = await prisma.miniRetiroSubmission.findMany({
+    select: {
+      fullName: true,
+      interest: true,
+      dateRestrictions: true,
+    },
+  });
+
+  return analyzeMiniRetiroWeekends(submissions);
+}
+
+export type MiniRetiroFilters = {
+  search?: string;
+  interest?: MiniRetiroInterest | "ALL";
+  from?: string;
+  to?: string;
+};
+
+export async function getMiniRetiroSubmissions(
+  filters: MiniRetiroFilters = {},
+) {
+  await requireAdmin();
+
+  const where: Prisma.MiniRetiroSubmissionWhereInput = {};
+
+  if (filters.search) {
+    where.OR = [
+      { fullName: { contains: filters.search, mode: "insensitive" } },
+      { email: { contains: filters.search, mode: "insensitive" } },
+    ];
+  }
+
+  if (filters.interest && filters.interest !== "ALL") {
+    where.interest = filters.interest;
+  }
+
+  if (filters.from || filters.to) {
+    where.createdAt = {};
+    if (filters.from) {
+      where.createdAt.gte = new Date(filters.from);
+    }
+    if (filters.to) {
+      where.createdAt.lte = new Date(`${filters.to}T23:59:59`);
+    }
+  }
+
+  return prisma.miniRetiroSubmission.findMany({
+    where,
+    orderBy: { createdAt: "desc" },
+  });
+}
+
+export async function getMiniRetiroById(id: string) {
+  await requireAdmin();
+
+  return prisma.miniRetiroSubmission.findUnique({
+    where: { id },
+  });
+}
+
+export async function exportMiniRetiroCsv(
+  filters: MiniRetiroFilters = {},
+): Promise<string> {
+  const submissions = await getMiniRetiroSubmissions(filters);
+
+  const headers = [
+    "Nome",
+    "E-mail",
+    "Interesse",
+    "Interesse (outro)",
+    "Restrições de data",
+    "Carro / carona",
+    "Restrições alimentares",
+    "Quarto compartilhado",
+    "Disponibilidade financeira",
+    "Observações",
+    "Criado em",
+  ];
+
+  const rows = submissions.map((sub) => [
+    sub.fullName,
+    sub.email,
+    interestLabels[sub.interest],
+    sub.interestOther,
+    sub.dateRestrictions,
+    carLabels[sub.carAvailability],
+    sub.dietaryRestrictions,
+    roomLabels[sub.roomSharing],
+    financialLabels[sub.financialAvailability],
+    sub.observations,
+    sub.createdAt.toISOString(),
+  ]);
+
+  return [
+    headers.join(","),
+    ...rows.map((row) => row.map(escapeCsv).join(",")),
+  ].join("\n");
 }

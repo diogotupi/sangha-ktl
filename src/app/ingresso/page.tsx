@@ -13,7 +13,7 @@ export default function IntakePage() {
   return (
     <SiteShell>
       <PageHeader
-        eyebrow="Encontros quinzenais"
+        eyebrow="Participe dos encontros online"
         title="Quero conhecer a sangha"
         description="Preencha com calma. Seu e-mail entrará em nossa lista e você receberá o link do Zoom antes de cada encontro."
         centered

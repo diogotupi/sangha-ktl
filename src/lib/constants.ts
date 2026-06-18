@@ -3,7 +3,7 @@ export const siteConfig = {
   shortName: "KTL",
   tagline: "O JARDIM DO DHARMA DA TRADIÇÃO VIVA",
   description:
-    "Centro de prática budista da tradição Kagyu — meditação, estudo e convivência no caminho do despertar.",
+    "Centro de prática budista da tradição Kagyu, meditação, estudo e convivência no caminho do despertar.",
   url: process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
   locale: "pt-BR",
   instagram: "https://instagram.com/ktl_rj",
@@ -12,7 +12,7 @@ export const siteConfig = {
 
 export const navLinks = [
   { href: "/", label: "Home" },
-  { href: "/quem-somos", label: "Quem Somos" },
+  { href: "/quem-somos", label: "Sobre a Sangha" },
   { href: "/encontros", label: "Atividades" },
   { href: "/materiais", label: "Material" },
   { href: "/ingresso", label: "Cadastro" },
@@ -21,7 +21,7 @@ export const navLinks = [
 export const meditationLabels = {
   NONE: "Nunca pratiquei",
   BEGINNER: "Iniciante (menos de 1 ano)",
-  INTERMEDIATE: "Intermediário (1–3 anos)",
+  INTERMEDIATE: "Intermediário (1 a 3 anos)",
   ADVANCED: "Avançado (mais de 3 anos)",
 } as const;
 
@@ -60,7 +60,7 @@ export const studyMaterials = [
     href: "#",
   },
   {
-    title: "Áudio — Meditação Guiada (20 min)",
+    title: "Áudio: Meditação Guiada (20 min)",
     type: "Áudio",
     description: "Prática guiada para cultivar presença e estabilidade.",
     href: "#",
@@ -75,24 +75,14 @@ export const studyMaterials = [
 
 export const upcomingEvents = [
   {
-    title: "Meditação Matinal",
-    date: "2026-06-22",
-    time: "07:00",
-    location: "Centro de Prática",
-    description: "Sessão aberta de meditação sentada e caminhada consciente.",
-  },
-  {
-    title: "Estudo do Dhamma",
-    date: "2026-06-28",
-    time: "19:30",
-    location: "Online",
-    description: "Leitura e diálogo sobre o Sutra do Coração.",
-  },
-  {
-    title: "Retiro de Fim de Semana",
-    date: "2026-07-12",
-    time: "09:00",
-    location: "Sítio da Sangha",
-    description: "Dois dias de silêncio, meditação e convivência.",
+    title: "Estudo: 37 Práticas dos Bodhisattvas - Tokme Zangpo",
+    date: "2026-06-27",
+    time: "11:00",
+    endTime: "13:00",
+    location: "Híbrido, Rio de Janeiro",
+    description:
+      "Daremos continuidade aos estudos do livro, e faremos práticas meditativas. Fique à vontade para participar como quiser.",
+    image: "/encontros/thokme-zangpo.png",
+    imageAlt: "Tokme Zangpo, autor das 37 Práticas dos Bodhisattvas",
   },
 ] as const;
