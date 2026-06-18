@@ -16,7 +16,7 @@ const ALLOWED_EXTENSIONS = new Set([
 export const MAX_DOWNLOAD_SIZE_BYTES = 100 * 1024 * 1024; // 100 MB
 
 export const MATERIAL_CATEGORIES = [
-  { id: "livros", folder: "Livros", label: "Livros" },
+  { id: "livros", folder: "Livros-site", label: "Livros" },
   { id: "sadhanas", folder: "Sadhanas", label: "Sadhanas" },
   { id: "gravacoes", folder: "Gravações", label: "Gravações" },
   { id: "imagens", folder: "Imagens", label: "Imagens" },
