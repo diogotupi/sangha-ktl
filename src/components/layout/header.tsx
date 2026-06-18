@@ -7,7 +7,6 @@ import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import { siteConfig, navLinks } from "@/lib/constants";
 import { cn } from "@/lib/utils";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 
 export function Header() {
@@ -54,11 +53,9 @@ export function Header() {
               {link.label}
             </Link>
           ))}
-          <ThemeToggle />
         </nav>
 
         <div className="flex items-center gap-2 md:hidden">
-          <ThemeToggle />
           <Button
             variant="ghost"
             size="icon-sm"
@@ -73,7 +70,7 @@ export function Header() {
 
       {open && (
         <nav
-          className="border-t border-border/40 px-6 py-6 md:hidden"
+          className="border-t border-brand/20 bg-gold/95 px-6 py-6 md:hidden"
           aria-label="Mobile"
         >
           <ul className="flex flex-col gap-4">
@@ -85,8 +82,8 @@ export function Header() {
                   className={cn(
                     "block text-base tracking-wide transition-colors",
                     pathname === link.href
-                      ? "text-foreground"
-                      : "text-muted-foreground",
+                      ? "font-semibold text-brand"
+                      : "text-white",
                   )}
                 >
                   {link.label}
