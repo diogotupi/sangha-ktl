@@ -66,7 +66,6 @@ export function HeroSlideshow() {
           activeSlide.desktopClass,
         )}
       />
-      <div className="absolute inset-0 bg-brand/55" />
     </div>
   );
 }
